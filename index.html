@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.success {
+            background: #e3fcec;
+            border: 2px solid #4caf50;
+        }
+
+        .result h2 {
+            color: #4caf50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .result p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Car Price Predictor</h1>
+        <p class="subtitle">Enter car specifications to estimate price</p>
+
+        <div class="input-group">
+            <label>🔧 Horsepower (HP)</label>
+            <input type="number" id="hp" placeholder="e.g., 150">
+        </div>
+
+        <div class="input-group">
+            <label>⛽ Miles Per Gallon (MPG)</label>
+            <input type="number" id="mpg" step="0.1" placeholder="e.g., 25">
+        </div>
+
+        <div class="input-group">
+            <label>📦 Engine Volume (cubic inches)</label>
+            <input type="number" id="volume" step="0.1" placeholder="e.g., 200">
+        </div>
+
+        <div class="input-group">
+            <label>⚖️ Weight (lbs)</label>
+            <input type="number" id="weight" placeholder="e.g., 3000">
+        </div>
+
+        <div class="input-group">
+            <label>🔄 Cylinders</label>
+            <input type="number" id="cylinders" placeholder="e.g., 4, 6, 8">
+        </div>
+
+        <button onclick="predictPrice()">💰 Predict Price</button>
+
+        <div id="result" class="result">
+            <h2 id="price"></h2>
+            <p>Estimated car price</p>
+        </div>
+
+        <footer>Powered by Random Forest Regression | Trained on real car data</footer>
+    </div>
+
+    <script>
+        async function predictPrice() {
+            const hp = document.getElementById('hp').value;
+            const mpg = document.getElementById('mpg').value;
+            const volume = document.getElementById('volume').value;
+            const weight = document.getElementById('weight').value;
+            const cylinders = document.getElementById('cylinders').value;
+
+            if (!hp || !mpg || !volume || !weight || !cylinders) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('show');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        hp: hp,
+                        mpg: mpg,
+                        volume: volume,
+                        weight: weight,
+                        cylinders: cylinders
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('price').innerHTML = data.formatted_price;
+                    resultDiv.classList.add('show', 'success');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
